@@ -28,11 +28,9 @@ How projects are handled is company dependant, and there are many different ways
 7. The company has a standard working week of 40 hours, and the engineer works 8 hours a day, 5 days a week.
 8. Finally, the company also has departmental and all-hands company meetings.
 
-This list is not exhaustive, but it is enough to demonstrate the problem and to develop a mathematical intuition of the problem. Depending on where you work, it might seem as though the list is exaggerating the problem, or trivializing it. This is why company culture is important, and why it is the focus of questions a good engineer will ask when interviewing for a new job.
+This list is not exhaustive, but it is enough to demonstrate the problem and to develop a mathematical intuition of the problem. Depending on where you work, it might seem as though the list is exaggerating the problem, or trivializing it. This is why company culture is important, and why it is the focus of questions an experienced engineer will ask when interviewing for a new job.
 
 ## The Visual Tool
-
-The visual tool I will use to demonstrate the problem is a timeline. The timeline will be split into 15 minute intervals, and will show the engineer's time over the course of a week. The timeline will be split into 5 sections, one for each day of the week. The timeline will also be split into 3 sections, one for each of the 3 types of time: project management time, project work time and context switching time. The timeline will also show the meetings and ad-hoc meetings that the engineer has to attend. The timeline will also show the team meetings and team ad-hoc meetings that the engineer has to attend. Finally, the timeline will show the departmental and all-hands company meetings that the engineer has to attend. The timeline will look something like this:
 
 <html lang='en'>
 <head>
@@ -47,6 +45,15 @@ The visual tool I will use to demonstrate the problem is a timeline. The timelin
       /* Remove title outline */
       font-weight: bold;
       outline: none;
+    }
+    
+    /* Style for input boxes and button */
+    .input-box {
+      margin: 10px;
+    }
+    
+    #generate-button {
+      margin: 10px;
     }
   </style>
   <script>
@@ -66,12 +73,77 @@ The visual tool I will use to demonstrate the problem is a timeline. The timelin
         weekends: false,
         eventOverlap: false,
       });
+      
       calendar.render();
+      
+      // Function to populate the calendar
+      function populateCalendar() {
+  var dayCounter = 0; // To keep track of weekdays
+  var avgNumMeetings = parseInt(document.getElementById('avgNumMeetings').value);
+  var avgMeetingDuration = parseInt(document.getElementById('avgMeetingDuration').value);
+  var contextSwitchTime = parseInt(document.getElementById('contextSwitchTime').value);
+  var eventSpacing = 15; // Minutes between event starts
+  
+  var totalSlotDuration = avgMeetingDuration + contextSwitchTime;
+  var minutesPerDay = 9 * 60 + 6 * 60; // Total minutes in the working day (9am to 6pm)
+  var minutesBetweenEvents = Math.ceil(minutesPerDay / avgNumMeetings);
+  
+  var events = [];
+  var currentDate = new Date();
+  while (currentDate.getDay() !== 1) {
+    currentDate.setDate(currentDate.getDate() + 1);
+    currentDate.setHours(9, 0, 0, 0);
+  }
+  
+  for (var i = 0; i < avgNumMeetings; i++) {
+    var startTime = new Date(currentDate.getTime() + (dayCounter * 24 * 60 * 60 * 1000));
+    startTime.setHours(9, 0, 0, 0); // Start at 9am
+    
+    var minutesToAdd = i * minutesBetweenEvents;
+    startTime.setMinutes(startTime.getMinutes() + minutesToAdd);
+    
+    // Ensure the start time is within working hours
+    if (startTime.getHours() >= 9 && startTime.getHours() + (avgMeetingDuration / 60) <= 18) {
+      events.push({
+        start: startTime,
+        end: new Date(startTime.getTime() + avgMeetingDuration * 60 * 1000),
+        backgroundColor: '#e0e0e0', // Lighter shade
+      });
+    }
+    
+    dayCounter++;
+    if (dayCounter === 5) {
+      dayCounter = 0;
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+  }
+  
+  calendar.removeAllEvents();
+  calendar.addEventSource(events);
+}
+      
+      document.getElementById('generate-button').addEventListener('click', populateCalendar);
     });
   </script>
 </head>
 <body>
+  <div class="input-box">
+    <label for="avgNumMeetings">Average Number of Meetings:</label>
+    <input type="number" id="avgNumMeetings" value="3">
+  </div>
+  
+  <div class="input-box">
+    <label for="avgMeetingDuration">Average Meeting Duration (in minutes):</label>
+    <input type="number" id="avgMeetingDuration" value="30">
+  </div>
+  
+  <div class="input-box">
+    <label for="contextSwitchTime">Context Switch Time (in minutes):</label>
+    <input type="number" id="contextSwitchTime" value="10">
+  </div>
+  
+  <button id="generate-button">Populate Calendar</button>
+  
   <div id='calendar'></div>
 </body>
 </html>
-
