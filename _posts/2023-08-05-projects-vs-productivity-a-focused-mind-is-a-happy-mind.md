@@ -75,7 +75,7 @@ This list is not exhaustive, but it is enough to demonstrate the problem and to 
       });
       
       calendar.render();
-      
+
       // Function to populate the calendar
       function populateCalendar() {
   var dayCounter = 0; // To keep track of weekdays
@@ -83,45 +83,76 @@ This list is not exhaustive, but it is enough to demonstrate the problem and to 
   var avgMeetingDuration = parseInt(document.getElementById('avgMeetingDuration').value);
   var contextSwitchTime = parseInt(document.getElementById('contextSwitchTime').value);
   var eventSpacing = 15; // Minutes between event starts
+  var workingDayStart = 9 * 60; // Start time in minutes (9 am)
+  var workingDayEnd = 18 * 60; // End time in minutes (6 pm)
   
   var totalSlotDuration = avgMeetingDuration + contextSwitchTime;
-  var minutesPerDay = 9 * 60 + 6 * 60; // Total minutes in the working day (9am to 6pm)
-  var minutesBetweenEvents = Math.ceil(minutesPerDay / avgNumMeetings);
+  var minutesPerDay = workingDayEnd - workingDayStart; // Total minutes in the working day
+  var totalMinutesAvailable = minutesPerDay * 5; // Total minutes available in the working week
+  var intervalBetweenEvents = Math.round(totalMinutesAvailable / avgNumMeetings);
   
   var events = [];
-  var currentDate = new Date();
-  while (currentDate.getDay() !== 1) {
+  const dayOfWeek = currentDate.getDay();
+
+  if (dayOfWeek === 0) {
+    // If it's Sunday, find the next Monday
     currentDate.setDate(currentDate.getDate() + 1);
-    currentDate.setHours(9, 0, 0, 0);
+  } else if (dayOfWeek > 1) {
+    // If it's Tuesday to Saturday, find the previous Monday
+    const daysUntilMonday = dayOfWeek - 1;
+    currentDate.setDate(currentDate.getDate() - daysUntilMonday);
   }
-  
-  for (var i = 0; i < avgNumMeetings; i++) {
-    var startTime = new Date(currentDate.getTime() + (dayCounter * 24 * 60 * 60 * 1000));
-    startTime.setHours(9, 0, 0, 0); // Start at 9am
+
+  // Set the time to 9:00 AM
+  currentDate.setHours(9, 0, 0, 0);
+  var weekStart = currentDate;
+  var meetingStartTime = currentDate;
+  for (var i = 0; i <= avgNumMeetings; i++) {
     
-    var minutesToAdd = i * minutesBetweenEvents;
-    startTime.setMinutes(startTime.getMinutes() + minutesToAdd);
-    
-    // Ensure the start time is within working hours
-    if (startTime.getHours() >= 9 && startTime.getHours() + (avgMeetingDuration / 60) <= 18) {
+    // Ensure the start time is within working hours and if it is display it
+    if (meetingStartTime.getHours() >= 9 && meetingStartTime.getHours() + (avgMeetingDuration / 60) <= 18) {
       events.push({
-        start: startTime,
-        end: new Date(startTime.getTime() + avgMeetingDuration * 60 * 1000),
-        backgroundColor: '#e0e0e0', // Lighter shade
+        start: meetingStartTime,
+        end: new Date(meetingStartTime.getTime() + avgMeetingDuration * 60),
+        backgroundColor: '#e0e0e0', // Blue shade
       });
+      if (meetingStartTime.getHours() + (avgMeetingDuration / 60) + (contextSwitchTime / 60) <= 18){
+        events.push({
+        start: new Date(meetingStartTime.getTime() + avgMeetingDuration * 60),
+        end: new Date(meetingStartTime.getTime() + avgMeetingDuration * 60 + contextSwitchTime * 60),
+        backgroundColor: '#f7be6d', // Orange shade
+      });
+      }
+    } 
+
+    // Update meetingStartTime
+    var minutesToAdd = i * intervalBetweenEvents;
+    meetingStartTime.setMinutes(meetingStartTime.getMinutes() + minutesToAdd);
+    
+    // Calculate the day and time for the meeting start
+    var meetingDay = meetingStartTime.getDay();
+    var meetingTime = meetingStartTime.getMinutes();
+    
+    // If the meeting time exceeds the working day end, move to the next day
+    if (meetingTime + avgMeetingDuration > workingDayEnd) {
+      meetingDay += 1;
+      meetingTime = (meetingTime + avgMeetingDuration) - minutesPerDay;
     }
+    
+    // Set the correct day and time for the meeting start
+    meetingStartTime.setDate(meetingStartTime.getDate() + dayCounter + (meetingDay - meetingStartTime.getDay()));
+    meetingStartTime.setMinutes(meetingTime);
     
     dayCounter++;
-    if (dayCounter === 5) {
+    if (dayCounter === 6) {
       dayCounter = 0;
-      currentDate.setDate(currentDate.getDate() + 7);
+      weekStart.setDate(weekStart.getDate() + 7);
     }
   }
   
-  calendar.removeAllEvents();
   calendar.addEventSource(events);
 }
-      
+            
       document.getElementById('generate-button').addEventListener('click', populateCalendar);
     });
   </script>
