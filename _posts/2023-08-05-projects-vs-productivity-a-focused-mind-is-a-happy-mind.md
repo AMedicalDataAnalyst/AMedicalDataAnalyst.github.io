@@ -195,7 +195,7 @@ The tool is also intended to be a guide for engineers to understand how to manag
 
 ## Why I built the tool and what I intend to do with it
 
-I wanted to be able to visualise how meetings were affecting my productivity. In the past I've had to work on as many as nine projects at once, each involving itss own meetings and technical work. I went through a pretty rough period of working for far more hours than were stated in my contract, to the detriment of my physical and mental health. I even had a pretty bad accident for which I was told to rest for a month to heal, but by the second week I was using the 'time off' to catch up on work that I was behind on. 
+I wanted to be able to visualise how meetings were affecting my productivity. In the past I've had to work on as many as nine projects at once, each involving its own meetings and technical work. I went through a pretty rough period of working for far more hours than were stated in my contract, to the detriment of my physical and mental health. I even had a pretty bad accident for which I was told to rest for a month to heal, but by the second week I was using the 'time off' to catch up on work that I was behind on. 
 
 I've since learned to say no.
 

@@ -17,7 +17,8 @@ $$
 
 with the values being fractions not percentages. 
 
-Here is a plot of expected behaviour for values of sensitivity and specificity of 0.9 and above- one can see that as the prevalence gets lower the sensitivity and specificity must improve significantly in order to achieve a decent performance. In particular a very high sensitivity is key for low prevalence datasets.
+Here is a plot of expected behaviour for values of sensitivity and specificity of 0.9 and above- one can see that as the prevalence gets lower the sensitivity and specificity must improve significantly in order to achieve a decent performance. In particular a very high sensitivity is key for low prevalence datasets. In fact, for a prevalence of 0.001 (or one in one thousand) a sensitivity of 0.99 will only achieve a FP/TP ratio of 10. A whopping sensitivity of 0.999 is required to achieve a false positive to true positive ratio of 1. Not many modern methods can yet achieve this for the subtle problems of anomaly detection.
 
-![Plots showing how the false positive to true positive ratio changes with prevalence, sensitivity and specificity](/assets/img/AnomalyDetection/fp_tp_curve_0.9.png){: width="700" height="400" }
+![Plot showing how the false positive to true positive ratio changes with prevalence, sensitivity and specificity](/assets/img/AnomalyDetection/fp_tp_curve_0.9_light.png){: width="700" height="400" .light }
 
+![Plot showing how the false positive to true positive ratio changes with prevalence, sensitivity and specificity](/assets/img/AnomalyDetection/fp_tp_curve_0.9_dark.png){: width="700" height="400" .dark }
