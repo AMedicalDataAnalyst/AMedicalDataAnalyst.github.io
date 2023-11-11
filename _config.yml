@@ -26,7 +26,7 @@ description: >- # used by seo meta and the atom feed
   A blog where I explain experiment design and computer vision concepts in simple, yet comprehensive terms. I might also post about other things that interest me from time to time.
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
-url: ""
+url: "https://amedicaldataanalyst.github.io"
 
 github:
   username: AMedicalDataAnalyst # change to your github username
@@ -93,7 +93,7 @@ comments:
   # Giscus options › https://giscus.app
   giscus:
     repo: AMedicalDataAnalyst/AMedicalDataAnalyst.giscus # <gh-username>/<repo>
-    repo_id R_kgDOKAYo7Q:
+    repo_id: # optional, default to the value of `repo`
     category: "Blog Comments" # optional, default to 'Comments'
     category_id: # optional, default to the value of `category`
     mapping: pathname # optional, default to 'pathname'
