@@ -11,7 +11,7 @@ I decided to create this (currently fairly basic) tool so that engineers and the
 
 The tool is also intended to be a guide for engineers to understand how to manage and communicate about their time. I use the word engineer fairly liberaly to mean anyone who is doing the technical work, whereas a manager refers to anyone who is overseeing it.
 
-<head>
+
   <meta charset='utf-8' />
   <title>Meeting Calendar</title>
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
@@ -168,7 +168,7 @@ The tool is also intended to be a guide for engineers to understand how to manag
       document.getElementById('generate-button').addEventListener('click', populateCalendar);
     });
   </script>
-</head>
+
   <div class="input-box">
     <label for="avgNumMeetings">Average Number of Meetings:</label>
     <input type="number" id="avgNumMeetings" value="5">
