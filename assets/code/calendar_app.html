@@ -1,0 +1,180 @@
+<html lang='en'>
+<head>
+  <meta charset='utf-8' />
+  <title>Meeting Calendar</title>
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+  <style>
+    /* Custom styles for the calendar */
+    #calendar {
+      border: 1px solid #ccc;
+      margin: 20px auto;
+      max-width: 900px;
+      /* Remove title outline */
+      font-weight: bold;
+      outline: none;
+    }
+    
+    /* Style for input boxes and button */
+    .input-box {
+      margin: 10px;
+    }
+    
+    #generate-button {
+      margin: 10px;
+    }
+  </style>
+  <script> 
+    // 0. Description of calendar to be shown
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        slotLabelFormat: {
+          hour: 'numeric',
+          minute: '2-digit',
+          omitZeroMinute: false,
+          meridiem: 'short'
+        },
+        slotDuration: '00:30:00',
+        slotMinTime: '09:00:00',
+        slotMaxTime: '18:00:00',
+        weekends: false,
+        eventOverlap: false,
+      });
+      
+    calendar.render();
+
+    // 1. Create the function to populate the calendar
+    function populateCalendar() {
+      // A. Pre-declare cariables of interest
+      const avgNumMeetings = parseInt(document.getElementById("avgNumMeetings").value);
+      const avgMeetingDuration = parseInt(document.getElementById("avgMeetingDuration").value)*60000;
+      const contextSwitchTime = parseInt(document.getElementById("contextSwitchTime").value)*60000;
+      const workingDayStart = 9; // Start time in minutes (9 am)
+      const workingDayEnd = 18; // End time in minutes (6 pm)
+      currentDate = new Date();
+      const minutesPerDay = (workingDayEnd - workingDayStart) * 60 * 60000;
+      const totalMinutesAvailable = minutesPerDay * 5;
+      const intervalBetweenEvents = Math.round(totalMinutesAvailable / (avgNumMeetings));
+      var events = [];
+      const dayOfWeek = currentDate.getDay()
+
+      // B. Initialise calendar and first meeting
+      // Clear all events from the calendar if any
+    calendar.getEventSources().forEach(function(eventSource) {
+      eventSource.remove();
+    });
+      if (dayOfWeek === 0) {
+        // If it's Sunday, find the next Monday
+        currentDate.setDate(currentDate.getDate() + 1);
+      } else if (dayOfWeek > 1) {
+        // If it's Tuesday to Saturday, find the previous Monday
+        const daysUntilMonday = dayOfWeek - 1;
+        currentDate.setDate(currentDate.getDate() - daysUntilMonday);
+      }
+      currentDate.setHours(9, 0, 0, 0);
+      let meetingStartTime = new Date(currentDate);
+
+      // C. Loop over number of meetings to populate calendar
+      for (var i = 0; i < avgNumMeetings; i++) {
+
+        // i. Ensure the start time is within working hours and if it is display it with associated context switches
+        if (meetingStartTime.getHours() >= 9 && meetingStartTime.getHours() + (avgMeetingDuration / 6000000) <= 18) {
+          events.push({
+          title: 'Meeting',
+          start: new Date(meetingStartTime),
+          end: new Date(meetingStartTime.getTime() + avgMeetingDuration),
+          description: "",
+          backgroundColor: '#e0e0e0', // Blue shade
+        });
+
+        // Context switch after meeting
+        let latterCSEnd = new Date(meetingStartTime.getTime() + avgMeetingDuration + contextSwitchTime);
+        if (meetingStartTime.getHours() > 17 && meetingStartTime.getMinutes() > 45){
+          latterCSEnd = new Date(meetingStartTime.getTime()-(meetingStartTime.getMinutes()-45)*60000)
+          events.push({
+          title: 'Context switch',
+          start: new Date(meetingStartTime.getTime() + avgMeetingDuration ),
+          end: new Date(meetingStartTime.getTime() + avgMeetingDuration + contextSwitchTime),
+          description: "",
+          backgroundColor: '#f7be6d', // Orange shade
+        });
+        } else {
+          events.push({
+          title: 'Context switch',
+          start: new Date(meetingStartTime.getTime() + avgMeetingDuration ),
+          end: latterCSEnd,
+          description: "",
+          backgroundColor: '#f7be6d', // Orange shade
+        });
+        }
+
+        // Context switch before meeting
+        let priorCSStart = new Date(meetingStartTime.getTime()-contextSwitchTime);
+        if (meetingStartTime.getHours() >= 9 && meetingStartTime.getMinutes() >= 15) {
+          events.push({
+          title: 'Context switch',
+          start: priorCSStart,
+          end: new Date(meetingStartTime.getTime()),
+          description: "",
+          backgroundColor: '#f7be6d', // Orange shade
+        });
+        } else if (meetingStartTime.getHours() === 9 && meetingStartTime.getMinutes() > 0) {
+          priorCSStart = new Date(meetingStartTime.getTime() - meetingStartTime.getMinutes()*60000);
+          events.push({
+          title: 'Context switch',
+          start: priorCSStart,
+          end: new Date(meetingStartTime.getTime()),
+          description: "",
+          backgroundColor: '#f7be6d', // Orange shade
+        });
+        }
+      } 
+
+    // Update meetingStartTime
+    var minutesToAdd = intervalBetweenEvents;
+    meetingStartTime = new Date(meetingStartTime.getTime() + minutesToAdd);
+    
+    // Calculate the day and time for the meeting start
+    var meetingDay = meetingStartTime.getDay();
+    
+    // If the meeting time exceeds the working day end, move to the next day
+    if (meetingStartTime.getHours() + (avgMeetingDuration / 6000000) < 9) {
+      meetingStartTime.setHours(9, 0, 0, 0)
+    }
+    if (meetingStartTime.getHours() + (avgMeetingDuration / 6000000) > 18) {
+      meetingDay += 1;
+      meetingStartTime.setDate(meetingStartTime.getDate() + 1);
+      meetingStartTime.setHours(9, 0, 0, 0)
+    }
+    
+  }
+  console.log(events)
+  calendar.addEventSource(events);
+}
+            
+      document.getElementById('generate-button').addEventListener('click', populateCalendar);
+    });
+  </script>
+</head>
+<body>
+  <div class="input-box">
+    <label for="avgNumMeetings">Average Number of Meetings:</label>
+    <input type="number" id="avgNumMeetings" value="5">
+  </div>
+  
+  <div class="input-box">
+    <label for="avgMeetingDuration">Average Meeting Duration (in minutes):</label>
+    <input type="number" id="avgMeetingDuration" value="50">
+  </div>
+  
+  <div class="input-box">
+    <label for="contextSwitchTime">Context Switch Time (in minutes):</label>
+    <input type="number" id="contextSwitchTime" value="15">
+  </div>
+  
+  <button id="generate-button">Populate Calendar</button>
+  
+  <div id='calendar'></div>
+</body>
+</html>
